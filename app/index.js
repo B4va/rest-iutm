@@ -17,6 +17,8 @@ app.listen(port, () => console.log(`Serveur lancé sur le port ${port}.`));
  * API.
  */
 
+// TODO : gérer le xml et les langues
+
 app.get('/api/utilisateur', async (req, res) => {
     const utilisateurs = await Utilisateur.findAll();
     if (utilisateurs) {
