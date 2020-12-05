@@ -1,0 +1,30 @@
+version: "3"
+services:
+  postgres:
+    container_name: postgres
+    image: postgres:11
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: pass
+      POSTGRES_DB: db
+  app:
+    container_name: app
+    restart: on-failure
+    build: .
+    depends_on:
+      - postgres
+    links:
+      - postgres
+    environment:
+      NODE_ENV: development
+      PORT: 3000
+      DATABASE_HOST: postgres
+    ports:
+      - "3000:3000"
+    command: bash -c "npm run db:migrate && npm run db:seed && npm run start"
+    volumes:
+      - .:/app/
+      - /app/node_modules
+      - .:/scripts/
