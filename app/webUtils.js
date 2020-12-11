@@ -9,7 +9,7 @@ const _sendMsg = (req, res, code, contentFr, contentEn) => {
     res.status(code).send(msg);
 }
 
-const _sendDataCollection = (req, res, data) => {
+const _sendDataCollection = (req, res, data, code) => {
     if (req.header('Accept') === 'application/xml') {
         data = convert.js2xml({
             // todo : remplacer 'utilisateurs' par 'collection', plus générique
@@ -19,7 +19,7 @@ const _sendDataCollection = (req, res, data) => {
             }
         }, jsToXmlOptions);
     }
-    res.status(200).send(data);
+    res.status(code).send(data);
 }
 
 const _sendData = (req, res, data, code) => {

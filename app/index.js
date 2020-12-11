@@ -25,7 +25,7 @@ app.listen(port, () => console.log(`Serveur lancé sur le port ${port}.`));
 app.get('/api/utilisateur', async (req, res) => {
     let utilisateurs = await Utilisateur.findAll();
     if (utilisateurs) {
-        sendDataCollection(req, res, utilisateurs)
+        sendDataCollection(req, res, utilisateurs, 200)
     } else {
         sendMsg(req, res, 204, 'Aucun utilisateur.', 'No user.');
     }
