@@ -1,15 +1,14 @@
 const express = require('express');
-const Utilisateur = require('./models/utilisateur')
-const convert = require('xml-js')
-const bodyParser = require('body-parser')
+const Utilisateur = require('./models/utilisateur');
+const bodyParser = require('body-parser');
+const xmlBodyParser = require('./xmlBodyParser');
+const {sendMsg, sendData, sendDataArray} = require('./webUtils');
 
 /**
  * Configuration générale.
  */
 const port = process.env.PORT || 3000;
 const app = express();
-const jsToXmlOptions = {compact: true, ignoreComment: true, spaces: 4}
-const xmlToJsOptions = {ignoreComment: true, alwaysChildren: false, compact: true, textFn: (val) => val};
 app.use(express.json());
 app.use(bodyParser.raw({type: 'application/xml'}))
 
@@ -22,53 +21,30 @@ app.listen(port, () => console.log(`Serveur lancé sur le port ${port}.`));
  * API.
  */
 
-// TODO : refac
-
+// READ (all)
 app.get('/api/utilisateur', async (req, res) => {
     let utilisateurs = await Utilisateur.findAll();
     if (utilisateurs) {
-        if (req.header('Accept') === 'application/xml') {
-            utilisateurs = convert.js2xml({
-                utilisateurs: {
-                    utilisateur: JSON.parse(JSON.stringify(utilisateurs))
-                }
-            }, jsToXmlOptions);
-        }
-        res.status(200).send(utilisateurs);
+        sendDataArray(req, res, utilisateurs)
     } else {
-        let msg = {msg: req.header('Accept-Language') === 'en' ? 'No user.' : 'Aucun utilisateur.'}
-        if (req.header('Accept') === 'application/xml') {
-            msg = convert.js2xml(msg, jsToXmlOptions)
-        }
-        res.status(204).send(msg);
+        sendMsg(req, res, 204, 'Aucun utilisateur.', 'No user.');
     }
 });
 
+// READ (one)
 app.get('/api/utilisateur/:id', async (req, res) => {
     let utilisateur = await Utilisateur.findOne({where: {id: req.params.id}});
     if (utilisateur) {
-        if (req.header('Accept') === 'application/xml') {
-            utilisateur = convert.js2xml({
-                utilisateur: JSON.parse(JSON.stringify(utilisateur))
-            }, jsToXmlOptions);
-        }
-        res.status(200).send(utilisateur);
+        sendData(req, res, utilisateur, 200);
     } else {
-        let msg = {err: req.header('Accept-Language') === 'en'
-                ? 'No user with this id.'
-                : 'Aucun utilisateur associé à l\'id.'}
-        if (req.header('Accept') === 'application/xml') {
-            msg = convert.js2xml(msg, jsToXmlOptions)
-        }
-        res.status(404).send(msg);
+        sendMsg(req, res, 404, 'Aucun utilisateur associé à l\'id.', 'No user with this id.');
     }
 });
 
-app.put('/api/utilisateur/:id', async (req, res) => {
+// UPDATE (whole)
+app.put('/api/utilisateur/:id', xmlBodyParser, async (req, res) => {
     try {
-        const {nom, prenom, email, bio} = req.header('Accept') === 'application/xml'
-            ? convert.xml2js(req.body, xmlToJsOptions).utilisateur
-            : req.body;
+        const {nom, prenom, email, bio} = req.body;
         await Utilisateur.update(
             {
                 nom: nom._text || nom || null,
@@ -80,36 +56,19 @@ app.put('/api/utilisateur/:id', async (req, res) => {
         );
         let utilisateur = await Utilisateur.findOne({where: {id: req.params.id}});
         if (utilisateur) {
-            if (req.header('Accept') === 'application/xml') {
-                utilisateur = convert.js2xml({
-                    utilisateur: JSON.parse(JSON.stringify(utilisateur))
-                }, jsToXmlOptions);
-            }
-            res.status(200).send(utilisateur);
+            sendData(req, res, utilisateur, 200);
         } else {
-            let msg = {err: req.header('Accept-Language') === 'en'
-                    ? 'No user with this id.'
-                    : 'Aucun utilisateur associé à l\'id.'}
-            if (req.header('Accept') === 'application/xml') {
-                msg = convert.js2xml(msg, jsToXmlOptions)
-            }
-            res.status(404).send(msg);
+            sendMsg(req, res, 404, 'Aucun utilisateur associé à l\'id.', 'No user with this id.');
         }
     } catch (e) {
-        let msg = {err: req.header('Accept-Language') === 'en' ? 'Wrong format' : 'Mauvais format'
-            + ' ' + req.header('Accept') === 'application/xml' ? 'XML' : 'JSON'} + '.';
-        if (req.header('Accept') === 'application/xml') {
-            msg = convert.js2xml(msg, jsToXmlOptions)
-        }
-        res.status(404).send(msg);
+        sendMsg(req, res, 400, 'Mauvais format de la requête.', 'Wrong request format.');
     }
 });
 
-app.patch('/api/utilisateur/:id', async (req, res) => {
+// UPDATE (attribute)
+app.patch('/api/utilisateur/:id', xmlBodyParser, async (req, res) => {
     try {
-        const {nom, prenom, email, bio} = req.header('Accept') === 'application/xml'
-            ? convert.xml2js(req.body, xmlToJsOptions).utilisateur
-            : req.body;
+        const {nom, prenom, email, bio} = req.body;
         await Utilisateur.update(
             {
                 nom: nom ? nom._text || nom : undefined,
@@ -121,58 +80,30 @@ app.patch('/api/utilisateur/:id', async (req, res) => {
         );
         let utilisateur = await Utilisateur.findOne({where: {id: req.params.id}});
         if (utilisateur) {
-            if (req.header('Accept') === 'application/xml') {
-                utilisateur = convert.js2xml({
-                    utilisateur: JSON.parse(JSON.stringify(utilisateur))
-                }, jsToXmlOptions);
-            }
-            res.status(200).send(utilisateur);
+            sendData(req, res, utilisateur, 200);
         } else {
-            let msg = {err: req.header('Accept-Language') === 'en'
-                    ? 'No user with this id.'
-                    : 'Aucun utilisateur associé à l\'id.'}
-            if (req.header('Accept') === 'application/xml') {
-                msg = convert.js2xml(msg, jsToXmlOptions)
-            }
-            res.status(404).send(msg);
+            sendMsg(req, res, 404, 'Aucun utilisateur associé à l\'id.', 'No user with this id.');
         }
     } catch (e) {
-        let msg = {err: req.header('Accept-Language') === 'en' ? 'Wrong format' : 'Mauvais format'
-            + ' ' + req.header('Accept') === 'application/xml' ? 'XML' : 'JSON'} + '.';
-        if (req.header('Accept') === 'application/xml') {
-            msg = convert.js2xml(msg, jsToXmlOptions)
-        }
-        res.status(404).send(msg);
+        sendMsg(req, res, 400, 'Mauvais format de la requête.', 'Wrong request format.');
     }
 });
 
+// DELETE
 app.delete('/api/utilisateur/:id', async (req, res) => {
     const utilisateur = await Utilisateur.findOne({where: {id: req.params.id}});
     if (utilisateur) {
         await Utilisateur.destroy({where: {id: req.params.id}});
-        let msg = {msg: req.header('Accept-Language') === 'en'
-                ? 'Object deleted.'
-                : 'Objet supprimé.'}
-        if (req.header('Accept') === 'application/xml') {
-            msg = convert.js2xml(msg, jsToXmlOptions)
-        }
-        res.status(200).send(msg);
+        sendMsg(req, res, 200, 'Objet supprimé.', 'Object deleted.');
     } else {
-        let msg = {err: req.header('Accept-Language') === 'en'
-                ? 'No user with this id.'
-                : 'Aucun utilisateur associé à l\'id.'}
-        if (req.header('Accept') === 'application/xml') {
-            msg = convert.js2xml(msg, jsToXmlOptions)
-        }
-        res.status(404).send(msg);
+        sendMsg(req, res, 404, 'Aucun utilisateur associé à l\'id.', 'No user with this id.');
     }
 });
 
-app.post('/api/utilisateur', async (req, res) => {
+// CREATE
+app.post('/api/utilisateur', xmlBodyParser, async (req, res) => {
     try {
-        const {nom, prenom, email, bio} = req.header('Accept') === 'application/xml'
-            ? convert.xml2js(req.body, xmlToJsOptions).utilisateur
-            : req.body;
+        const {nom, prenom, email, bio} = req.body;
         if (nom && prenom && email && bio) {
             let utilisateur = await Utilisateur.create(
                 {
@@ -181,27 +112,11 @@ app.post('/api/utilisateur', async (req, res) => {
                     email: email._text || email || null,
                     bio: bio._text || bio || null
                 });
-            if (req.header('Accept') === 'application/xml') {
-                utilisateur = convert.js2xml({
-                    utilisateur: JSON.parse(JSON.stringify(utilisateur))
-                }, jsToXmlOptions);
-            }
-            res.status(201).send(utilisateur);
+            sendData(req, res, utilisateur, 201);
         } else {
-            let msg = {err: req.header('Accept-Language') === 'en'
-                    ? 'Attribute(s) missing.'
-                    : 'Tous les attributs doivent être renseignés.'}
-            if (req.header('Accept') === 'application/xml') {
-                msg = convert.js2xml(msg, jsToXmlOptions)
-            }
-            res.status(404).send(msg);
+            sendMsg(req, res, 400, 'Tous les attributs doivent être renseignés.', 'Attribute(s) missing.');
         }
     } catch (e) {
-        let msg = {err: req.header('Accept-Language') === 'en' ? 'Wrong format' : 'Mauvais format'
-                + ' ' + req.header('Accept') === 'application/xml' ? 'XML' : 'JSON'} + '.';
-        if (req.header('Accept') === 'application/xml') {
-            msg = convert.js2xml(msg, jsToXmlOptions)
-        }
-        res.status(404).send(msg);
+        sendMsg(req, res, 400, 'Mauvais format de la requête.', 'Wrong request format.');
     }
 });
