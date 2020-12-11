@@ -149,12 +149,14 @@ app.patch('/api/utilisateur/:id', async (req, res) => {
 app.delete('/api/utilisateur/:id', async (req, res) => {
     const utilisateur = await Utilisateur.findOne({where: {id: req.params.id}});
     if (utilisateur) {
-        Utilisateur.destroy({where: {id: req.params.id}});
-        let msg = {msg: "Objet supprimé."}
+        await Utilisateur.destroy({where: {id: req.params.id}});
+        let msg = {msg: req.header('Accept-Language') === 'en'
+                ? 'Object deleted.'
+                : 'Objet supprimé.'}
         if (req.header('Accept') === 'application/xml') {
             msg = convert.js2xml(msg, jsToXmlOptions)
         }
-        res.status(204).send(msg);
+        res.status(200).send(msg);
     } else {
         let msg = {err: req.header('Accept-Language') === 'en'
                 ? 'No user with this id.'
