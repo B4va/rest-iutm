@@ -22,7 +22,7 @@ app.listen(port, () => console.log(`Serveur lancé sur le port ${port}.`));
  * API.
  */
 
-// TODO : gérer les langues et refactoriser
+// TODO : refac
 
 app.get('/api/utilisateur', async (req, res) => {
     let utilisateurs = await Utilisateur.findAll();
@@ -36,7 +36,7 @@ app.get('/api/utilisateur', async (req, res) => {
         }
         res.status(200).send(utilisateurs);
     } else {
-        let msg = {msg: "Aucun utilisateur."}
+        let msg = {msg: req.header('Accept-Language') === 'en' ? 'No user.' : 'Aucun utilisateur.'}
         if (req.header('Accept') === 'application/xml') {
             msg = convert.js2xml(msg, jsToXmlOptions)
         }
@@ -54,7 +54,9 @@ app.get('/api/utilisateur/:id', async (req, res) => {
         }
         res.status(200).send(utilisateur);
     } else {
-        let msg = {err: "Aucun utilisateur associé à l'id."}
+        let msg = {err: req.header('Accept-Language') === 'en'
+                ? 'No user with this id.'
+                : 'Aucun utilisateur associé à l\'id.'}
         if (req.header('Accept') === 'application/xml') {
             msg = convert.js2xml(msg, jsToXmlOptions)
         }
@@ -85,14 +87,17 @@ app.put('/api/utilisateur/:id', async (req, res) => {
             }
             res.status(200).send(utilisateur);
         } else {
-            let msg = {err: "Aucun utilisateur associé à l'id."}
+            let msg = {err: req.header('Accept-Language') === 'en'
+                    ? 'No user with this id.'
+                    : 'Aucun utilisateur associé à l\'id.'}
             if (req.header('Accept') === 'application/xml') {
                 msg = convert.js2xml(msg, jsToXmlOptions)
             }
             res.status(404).send(msg);
         }
     } catch (e) {
-        let msg = {err: `Mauvais format ${req.header('Accept') === 'application/xml' ? 'XML' : 'JSON'}.`};
+        let msg = {err: req.header('Accept-Language') === 'en' ? 'Wrong format' : 'Mauvais format'
+            + ' ' + req.header('Accept') === 'application/xml' ? 'XML' : 'JSON'} + '.';
         if (req.header('Accept') === 'application/xml') {
             msg = convert.js2xml(msg, jsToXmlOptions)
         }
@@ -123,14 +128,17 @@ app.patch('/api/utilisateur/:id', async (req, res) => {
             }
             res.status(200).send(utilisateur);
         } else {
-            let msg = {err: "Aucun utilisateur associé à l'id."}
+            let msg = {err: req.header('Accept-Language') === 'en'
+                    ? 'No user with this id.'
+                    : 'Aucun utilisateur associé à l\'id.'}
             if (req.header('Accept') === 'application/xml') {
                 msg = convert.js2xml(msg, jsToXmlOptions)
             }
             res.status(404).send(msg);
         }
     } catch (e) {
-        let msg = {err: `Mauvais format ${req.header('Accept') === 'application/xml' ? 'XML' : 'JSON'}.`};
+        let msg = {err: req.header('Accept-Language') === 'en' ? 'Wrong format' : 'Mauvais format'
+            + ' ' + req.header('Accept') === 'application/xml' ? 'XML' : 'JSON'} + '.';
         if (req.header('Accept') === 'application/xml') {
             msg = convert.js2xml(msg, jsToXmlOptions)
         }
@@ -148,7 +156,9 @@ app.delete('/api/utilisateur/:id', async (req, res) => {
         }
         res.status(204).send(msg);
     } else {
-        let msg = {err: "Aucun utilisateur associé à l'id."}
+        let msg = {err: req.header('Accept-Language') === 'en'
+                ? 'No user with this id.'
+                : 'Aucun utilisateur associé à l\'id.'}
         if (req.header('Accept') === 'application/xml') {
             msg = convert.js2xml(msg, jsToXmlOptions)
         }
@@ -176,14 +186,17 @@ app.post('/api/utilisateur', async (req, res) => {
             }
             res.status(201).send(utilisateur);
         } else {
-            let msg = {err: "Tous les attributs doivent être renseignés."}
+            let msg = {err: req.header('Accept-Language') === 'en'
+                    ? 'Attribute(s) missing.'
+                    : 'Tous les attributs doivent être renseignés.'}
             if (req.header('Accept') === 'application/xml') {
                 msg = convert.js2xml(msg, jsToXmlOptions)
             }
             res.status(404).send(msg);
         }
     } catch (e) {
-        let msg = {err: `Mauvais format ${req.header('Accept') === 'application/xml' ? 'XML' : 'JSON'}.`};
+        let msg = {err: req.header('Accept-Language') === 'en' ? 'Wrong format' : 'Mauvais format'
+                + ' ' + req.header('Accept') === 'application/xml' ? 'XML' : 'JSON'} + '.';
         if (req.header('Accept') === 'application/xml') {
             msg = convert.js2xml(msg, jsToXmlOptions)
         }
