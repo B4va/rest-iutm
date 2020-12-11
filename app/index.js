@@ -27,7 +27,7 @@ app.get('/api/utilisateur', async (req, res) => {
     if (utilisateurs) {
         sendDataCollection(req, res, utilisateurs, 200)
     } else {
-        sendMsg(req, res, 204, 'Aucun utilisateur.', 'No user.');
+        sendMsg(req, res, 404, 'Aucun utilisateur.', 'No user.');
     }
 });
 
