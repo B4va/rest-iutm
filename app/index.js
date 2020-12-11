@@ -18,7 +18,7 @@ app.use(bodyParser.raw({type: 'application/xml'}))
 app.listen(port, () => console.log(`Serveur lancé sur le port ${port}.`));
 
 /**
- * API.
+ * API - Utilisateur.
  */
 
 // READ (all)
@@ -52,8 +52,7 @@ app.put('/api/utilisateur/:id', xmlBodyParser, async (req, res) => {
                 email: email._text || email || null,
                 bio: bio._text || bio || null
             },
-            {where: {id: req.params.id}}
-        );
+            {where: {id: req.params.id}});
         let utilisateur = await Utilisateur.findOne({where: {id: req.params.id}});
         if (utilisateur) {
             sendData(req, res, utilisateur, 200);
@@ -76,8 +75,7 @@ app.patch('/api/utilisateur/:id', xmlBodyParser, async (req, res) => {
                 email: email ? email._text || email : undefined,
                 bio: bio ? bio._text || bio : undefined
             },
-            {where: {id: req.params.id}}
-        );
+            {where: {id: req.params.id}});
         let utilisateur = await Utilisateur.findOne({where: {id: req.params.id}});
         if (utilisateur) {
             sendData(req, res, utilisateur, 200);
