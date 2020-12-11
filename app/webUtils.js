@@ -9,7 +9,7 @@ const _sendMsg = (req, res, code, contentFr, contentEn) => {
     res.status(code).send(msg);
 }
 
-const _sendDataArray = (req, res, data) => {
+const _sendDataCollection = (req, res, data) => {
     if (req.header('Accept') === 'application/xml') {
         data = convert.js2xml({
             // todo : remplacer 'utilisateurs' par 'collection', plus générique
@@ -35,5 +35,5 @@ const _sendData = (req, res, data, code) => {
 module.exports = {
     sendMsg: _sendMsg,
     sendData: _sendData,
-    sendDataArray: _sendDataArray
+    sendDataCollection: _sendDataCollection
 }

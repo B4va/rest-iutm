@@ -2,7 +2,7 @@ const express = require('express');
 const Utilisateur = require('./models/utilisateur');
 const bodyParser = require('body-parser');
 const xmlBodyParser = require('./xmlBodyParser');
-const {sendMsg, sendData, sendDataArray} = require('./webUtils');
+const {sendMsg, sendData, sendDataCollection} = require('./webUtils');
 
 /**
  * Configuration générale.
@@ -25,7 +25,7 @@ app.listen(port, () => console.log(`Serveur lancé sur le port ${port}.`));
 app.get('/api/utilisateur', async (req, res) => {
     let utilisateurs = await Utilisateur.findAll();
     if (utilisateurs) {
-        sendDataArray(req, res, utilisateurs)
+        sendDataCollection(req, res, utilisateurs)
     } else {
         sendMsg(req, res, 204, 'Aucun utilisateur.', 'No user.');
     }
