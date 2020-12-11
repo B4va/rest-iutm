@@ -12,8 +12,10 @@ const _sendMsg = (req, res, code, contentFr, contentEn) => {
 const _sendDataArray = (req, res, data) => {
     if (req.header('Accept') === 'application/xml') {
         data = convert.js2xml({
-            collection: {
-                item: JSON.parse(JSON.stringify(data))
+            // todo : remplacer 'utilisateurs' par 'collection', plus générique
+            utilisateurs: {
+                // todo : remplacer 'utilisateur' par 'item', plus générique
+                utilisateur: JSON.parse(JSON.stringify(data))
             }
         }, jsToXmlOptions);
     }
@@ -23,7 +25,8 @@ const _sendDataArray = (req, res, data) => {
 const _sendData = (req, res, data, code) => {
     if (req.header('Accept') === 'application/xml') {
         data = convert.js2xml({
-            item: JSON.parse(JSON.stringify(data))
+            // todo : remplacer 'utilisateur' par 'item', plus générique
+            utilisateur: JSON.parse(JSON.stringify(data))
         }, jsToXmlOptions);
     }
     res.status(code).send(data);

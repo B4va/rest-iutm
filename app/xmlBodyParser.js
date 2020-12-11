@@ -3,7 +3,8 @@ const xmlToJsOptions = {ignoreComment: true, alwaysChildren: false, compact: tru
 
 module.exports = (req, res, next) => {
     if (req.header('Accept') === 'application/xml') {
-        req.body = convert.xml2js(req.body, xmlToJsOptions).item
+        // todo : remplacer 'utilisateur' par 'item', plus général
+        req.body = convert.xml2js(req.body, xmlToJsOptions).utilisateur
     }
     next();
 }
